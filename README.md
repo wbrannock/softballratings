@@ -108,13 +108,49 @@ predict_game(ratings, "Oklahoma", "Texas", neutral=False)
 
 `p_home_wins` comes from `Φ(pred_margin / sigma)` where σ is the model's training-residual std — the noise floor of softball as a sport, currently ~4.6 runs per game. Big margins compress to confident probabilities; small margins stay near 50/50.
 
-## Refreshing
+## Daily refresh workflow
 
-Massey is updated daily during the season. To refit on the latest scores:
+Massey is updated daily during the season. The default `rate` command auto-refreshes the scrape cache when it's more than 6 hours old, so a daily check is just one line:
 
 ```bash
-uv run python -m softballratings.rate --refresh    # re-scrape + refit + write CSV
-uv run python -m softballratings.eval              # validate against the new test tail
+uv run python -m softballratings.rate                # auto-refresh + refit + show top 25 + movers
+uv run python -m softballratings.rate --top 50       # show more teams
+uv run python -m softballratings.rate --refresh      # force re-scrape now
+uv run python -m softballratings.rate --max-age 0    # same as --refresh
+uv run python -m softballratings.rate --no-save      # dry run, don't touch CSVs
+```
+
+Each run:
+1. Auto-refreshes the Massey scrape if `data/games.csv` is older than `--max-age` hours (default 6).
+2. Reads the previous `data/ratings.csv` so it can compute movers.
+3. Fits the production model on the full filtered dataset.
+4. Rotates the previous file to `data/ratings_prev.csv` and writes the new ratings to `data/ratings.csv`.
+5. Prints the top-N table plus the biggest rank movers since last run.
+
+Sample output:
+
+```
+fit on 6123 games, 308 teams (2026-02-05 → 2026-04-15)
+HFA = 0.265 runs    sigma = 4.612    league_mean = 5.141
+
+Top 25:
+ rank          team  n_games   off    def   net  p_beat_avg
+    1      Oklahoma       44 6.056 -3.541 9.597       0.981
+    2    Texas Tech       45 4.855 -3.778 8.633       0.969
+    ...
+
+Biggest movers since last run:
+  ↑ Oregon            rank  19 → 15   (+4, net +0.31)
+  ↓ Arizona           rank  22 → 28   (-6, net -0.42)
+  ...
+
+wrote data/ratings.csv (previous → data/ratings_prev.csv)
+```
+
+To re-validate the model against a held-out tail when you want to confirm nothing has drifted:
+
+```bash
+uv run python -m softballratings.eval
 ```
 
 The scraper uses `curl_cffi` with Chrome TLS impersonation to bypass Cloudflare's JS challenge, so no manual page saving is required.

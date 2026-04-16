@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import time
 from pathlib import Path
 
 import pandas as pd
@@ -72,13 +73,23 @@ def fetch_raw(
     url: str = DEFAULT_URL,
     cache_path: str | Path = DEFAULT_CACHE,
     refresh: bool = False,
+    max_age_hours: float | None = None,
 ) -> pd.DataFrame:
     """Fetch Massey scores, parse, and cache to CSV.
 
     Massey is behind Cloudflare, so we use curl_cffi with Chrome impersonation.
+
+    If ``max_age_hours`` is set, the cache auto-expires once it's that old —
+    used by the daily refresh workflow so you don't have to remember to pass
+    ``--refresh`` every time.
     """
     cache_path = Path(cache_path)
-    if cache_path.exists() and not refresh:
+    cache_fresh = cache_path.exists() and not refresh
+    if cache_fresh and max_age_hours is not None:
+        age_hours = (time.time() - cache_path.stat().st_mtime) / 3600
+        if age_hours > max_age_hours:
+            cache_fresh = False
+    if cache_fresh:
         df = pd.read_csv(cache_path, parse_dates=["date"])
         return df
 
