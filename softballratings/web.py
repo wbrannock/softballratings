@@ -87,15 +87,43 @@ PAGE = """<!DOCTYPE html>
     background: #f3f4f6;
     font-size: 0.78rem;
     color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
     border-bottom: 1px solid var(--border);
+  }}
+  th[aria-sort="ascending"] .sort-indicator,
+  th[aria-sort="descending"] .sort-indicator {{
+    color: var(--accent);
   }}
   td {{ border-top: 1px solid var(--border); font-size: 0.93rem; }}
   tbody tr:first-child td {{ border-top: none; }}
   tbody tr:hover td {{ background: #f9fafb; }}
   .num {{ text-align: right; }}
   .rank {{ width: 3rem; color: var(--muted); }}
+  .sort-button {{
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.35rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+  }}
+  .sort-button:hover {{ color: var(--text); }}
+  .sort-button:focus-visible {{
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }}
+  .sort-indicator {{
+    min-width: 0.9rem;
+    color: #9ca3af;
+    text-align: center;
+  }}
   .team {{ font-weight: 500; }}
   .pos {{ color: var(--pos); }}
   .neg {{ color: var(--neg); }}
@@ -129,13 +157,13 @@ PAGE = """<!DOCTYPE html>
   <table>
     <thead>
       <tr>
-        <th class="rank">Rank</th>
-        <th>Team</th>
-        <th class="num">G</th>
-        <th class="num">Net</th>
-        <th class="num">Off</th>
-        <th class="num">Def</th>
-        <th class="num">P(beat avg)</th>
+        <th class="rank" aria-sort="ascending"><button type="button" class="sort-button" data-sort-key="rank"><span>Rank</span><span class="sort-indicator" aria-hidden="true">▲</span></button></th>
+        <th aria-sort="none"><button type="button" class="sort-button" data-sort-key="team"><span>Team</span><span class="sort-indicator" aria-hidden="true">↕</span></button></th>
+        <th class="num" aria-sort="none"><button type="button" class="sort-button" data-sort-key="games"><span>G</span><span class="sort-indicator" aria-hidden="true">↕</span></button></th>
+        <th class="num" aria-sort="none"><button type="button" class="sort-button" data-sort-key="net"><span>Net</span><span class="sort-indicator" aria-hidden="true">↕</span></button></th>
+        <th class="num" aria-sort="none"><button type="button" class="sort-button" data-sort-key="off"><span>Off</span><span class="sort-indicator" aria-hidden="true">↕</span></button></th>
+        <th class="num" aria-sort="none"><button type="button" class="sort-button" data-sort-key="def"><span>Def</span><span class="sort-indicator" aria-hidden="true">↕</span></button></th>
+        <th class="num" aria-sort="none"><button type="button" class="sort-button" data-sort-key="p"><span>P(beat avg)</span><span class="sort-indicator" aria-hidden="true">↕</span></button></th>
       </tr>
     </thead>
     <tbody>
@@ -152,13 +180,85 @@ PAGE = """<!DOCTYPE html>
 
   <script>
     const input = document.getElementById('filter');
-    const rows = Array.from(document.querySelectorAll('tbody tr'));
-    input.addEventListener('input', e => {{
-      const q = e.target.value.trim().toLowerCase();
-      rows.forEach(r => {{
-        r.style.display = q && !r.dataset.team.includes(q) ? 'none' : '';
+    const tableBody = document.querySelector('tbody');
+    const rows = Array.from(tableBody.querySelectorAll('tr'));
+    const headers = Array.from(document.querySelectorAll('th'));
+    const buttons = Array.from(document.querySelectorAll('.sort-button'));
+    let sortState = {{ key: 'rank', direction: 'asc' }};
+
+    const directionDefaults = {{
+      rank: 'asc',
+      team: 'asc',
+      games: 'desc',
+      net: 'desc',
+      off: 'desc',
+      def: 'asc',
+      p: 'desc',
+    }};
+
+    function updateFilter() {{
+      const q = input.value.trim().toLowerCase();
+      rows.forEach(row => {{
+        row.style.display = q && !row.dataset.team.includes(q) ? 'none' : '';
+      }});
+    }}
+
+    function setHeaderState() {{
+      headers.forEach(header => {{
+        const button = header.querySelector('.sort-button');
+        if (!button) {{
+          return;
+        }}
+
+        const active = button.dataset.sortKey === sortState.key;
+        const indicator = button.querySelector('.sort-indicator');
+        header.setAttribute(
+          'aria-sort',
+          active ? (sortState.direction === 'asc' ? 'ascending' : 'descending') : 'none',
+        );
+        indicator.textContent = active ? (sortState.direction === 'asc' ? '▲' : '▼') : '↕';
+      }});
+    }}
+
+    function compareRows(left, right) {{
+      const {{ key, direction }} = sortState;
+      let result = 0;
+
+      if (key === 'team') {{
+        result = left.dataset.team.localeCompare(right.dataset.team);
+      }} else {{
+        result = Number.parseFloat(left.dataset[key]) - Number.parseFloat(right.dataset[key]);
+      }}
+
+      if (result === 0) {{
+        result = Number.parseFloat(left.dataset.rank) - Number.parseFloat(right.dataset.rank);
+      }}
+
+      return direction === 'asc' ? result : -result;
+    }}
+
+    function applySort() {{
+      rows.sort(compareRows);
+      tableBody.append(...rows);
+      updateFilter();
+      setHeaderState();
+    }}
+
+    input.addEventListener('input', updateFilter);
+
+    buttons.forEach(button => {{
+      button.addEventListener('click', () => {{
+        const key = button.dataset.sortKey;
+        if (sortState.key === key) {{
+          sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
+        }} else {{
+          sortState = {{ key, direction: directionDefaults[key] }};
+        }}
+        applySort();
       }});
     }});
+
+    setHeaderState();
   </script>
 </body>
 </html>
@@ -171,7 +271,13 @@ def _row(rank: int, team: str, n: int, off: float, def_: float, net: float, p: f
     net_cls = "pos" if net > 0 else "neg" if net < 0 else ""
     team_esc = escape(team)
     return (
-        f'      <tr data-team="{team_esc.lower()}">'
+        f'      <tr data-team="{team_esc.lower()}"'
+        f' data-rank="{rank}"'
+        f' data-games="{n}"'
+        f' data-net="{net:.12f}"'
+        f' data-off="{off:.12f}"'
+        f' data-def="{def_:.12f}"'
+        f' data-p="{p:.12f}">'
         f'<td class="rank">{rank}</td>'
         f'<td class="team">{team_esc}</td>'
         f'<td class="num">{n}</td>'
