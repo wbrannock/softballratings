@@ -147,7 +147,6 @@ PAGE = """<!DOCTYPE html>
     KenPom-style opponent-adjusted ratings via ridge regression with recency weighting.<br>
     Higher Off = scores more vs. average. Lower (more negative) Def = allows fewer vs. average.
     Net = expected margin vs. an average team on a neutral field.<br>
-    Source: <a href="https://masseyratings.com/csoft/ncaa-d1/ratings">Massey Ratings</a> ·
     Methodology and code: <a href="{repo_url}">GitHub</a>
   </footer>
 
