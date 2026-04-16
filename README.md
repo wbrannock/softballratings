@@ -155,6 +155,47 @@ uv run python -m softballratings.eval
 
 The scraper uses `curl_cffi` with Chrome TLS impersonation to bypass Cloudflare's JS challenge, so no manual page saving is required.
 
+## Public web page (GitHub Pages + Actions)
+
+The repo ships with a daily GitHub Action (`.github/workflows/daily.yml`) that scrapes Massey, refits the ratings, renders a static HTML page to `docs/index.html`, and commits the result. Combined with GitHub Pages, this gives you a public dashboard that auto-updates every morning with **zero hosting cost and no server**.
+
+### One-time setup
+
+1. **Make the repo public** (Settings → General → Danger Zone → Change visibility).
+2. **Enable GitHub Pages**: Settings → Pages → "Build and deployment" → Source: **Deploy from a branch** → Branch: **main**, Folder: **/docs**. Save.
+3. **Allow Actions to push commits**: Settings → Actions → General → "Workflow permissions" → **Read and write permissions**. Save.
+4. (optional) Trigger the first run manually: Actions tab → "Daily ratings update" → "Run workflow".
+
+After the first run, your page is live at:
+
+```
+https://<your-github-username>.github.io/<repo-name>/
+```
+
+### How the daily action works
+
+```yaml
+schedule: cron "0 13 * * *"   # 13:00 UTC = 9am ET
+```
+
+Each run:
+1. `uv sync --frozen` — install the locked dependency set
+2. `uv run python -m softballratings.rate --refresh` — re-scrape Massey, refit, write `data/ratings.csv` and `data/ratings_prev.csv`
+3. `uv run python -m softballratings.web --repo-url …` — render `docs/index.html` from the CSV
+4. Commit the three files (only if anything actually changed) and push
+
+Adjust the cron in `.github/workflows/daily.yml` if you want a different time, or trigger manually any time from the Actions tab.
+
+### Local preview
+
+```bash
+uv run python -m softballratings.rate         # generates data/ratings.csv
+uv run python -m softballratings.web          # renders docs/index.html
+open docs/index.html                          # macOS — view in browser
+```
+
+The page is a single self-contained HTML file with inline CSS and a tiny vanilla-JS team filter. No build step, no dependencies, no JavaScript libraries pulled from CDNs.
+
 ## Adding a new model variant
 
 1. Write a `(train, test) -> Predictions` function in `eval.py` (or build on `_ridge` / `_aridge` / `_iter_mean` for variants).

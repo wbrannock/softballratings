@@ -10,6 +10,8 @@ wheels/
 .venv
 
 # Project
-data/
+data/*
+!data/ratings.csv
+!data/ratings_prev.csv
 .ipynb_checkpoints/
 .DS_Store

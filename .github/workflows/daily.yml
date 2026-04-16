@@ -1,0 +1,44 @@
+name: Daily ratings update
+
+on:
+  schedule:
+    # Every day at 13:00 UTC (≈ 9am ET / 6am PT)
+    - cron: "0 13 * * *"
+  workflow_dispatch:  # allow manual runs from the Actions tab
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed so we can commit the updated CSV + HTML
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: latest
+
+      - name: Sync dependencies
+        run: uv sync --frozen
+
+      - name: Refresh ratings
+        run: uv run python -m softballratings.rate --refresh
+
+      - name: Render HTML
+        run: |
+          uv run python -m softballratings.web \
+            --repo-url "https://github.com/${{ github.repository }}"
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/ratings.csv data/ratings_prev.csv docs/index.html
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "Daily ratings update: $(date -u +%Y-%m-%d)"
+          git push
