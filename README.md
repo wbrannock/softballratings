@@ -1,5 +1,7 @@
 # softballratings
 
+**[View the live ratings →](https://wbrannock.github.io/softballratings/)**
+
 Opponent-adjusted offensive and defensive ratings for D1 college softball, fit via ridge regression with recency weighting and updated daily.
 
 ## What it does
