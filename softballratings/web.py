@@ -132,9 +132,9 @@ PAGE = """<!DOCTYPE html>
         <th class="rank">Rank</th>
         <th>Team</th>
         <th class="num">G</th>
+        <th class="num">Net</th>
         <th class="num">Off</th>
         <th class="num">Def</th>
-        <th class="num">Net</th>
         <th class="num">P(beat avg)</th>
       </tr>
     </thead>
@@ -175,9 +175,9 @@ def _row(rank: int, team: str, n: int, off: float, def_: float, net: float, p: f
         f'<td class="rank">{rank}</td>'
         f'<td class="team">{team_esc}</td>'
         f'<td class="num">{n}</td>'
+        f'<td class="num {net_cls}"><strong>{net:+.2f}</strong></td>'
         f'<td class="num {off_cls}">{off:+.2f}</td>'
         f'<td class="num {def_cls}">{def_:+.2f}</td>'
-        f'<td class="num {net_cls}"><strong>{net:+.2f}</strong></td>'
         f'<td class="num">{p:.1%}</td>'
         f'</tr>'
     )

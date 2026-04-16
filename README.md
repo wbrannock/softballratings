@@ -10,13 +10,13 @@ The model is fit jointly across every D1 game played this season. There's no pre
 
 ## Quick example
 
-| Rank | Team | Off | Def | Net |
+| Rank | Team | Net | Off | Def |
 |---:|---|---:|---:|---:|
-| 1 | Oklahoma | +6.06 | −3.54 | 9.60 |
-| 2 | Texas Tech | +4.86 | −3.78 | 8.63 |
-| 3 | Arkansas | +4.47 | −3.85 | 8.31 |
-| 4 | UCLA | +6.26 | −1.97 | 8.23 |
-| 5 | Florida | +4.14 | −3.48 | 7.62 |
+| 1 | Oklahoma | 9.60 | +6.06 | −3.54 |
+| 2 | Texas Tech | 8.63 | +4.86 | −3.78 |
+| 3 | Arkansas | 8.31 | +4.47 | −3.85 |
+| 4 | UCLA | 8.23 | +6.26 | −1.97 |
+| 5 | Florida | 7.62 | +4.14 | −3.48 |
 | … | … | … | … | … |
 
 A net rating of 9.60 means *Oklahoma is expected to beat an average D1 team by about 9.6 runs on a neutral field*. Any matchup can be converted into a predicted final score and a win probability with one function call.

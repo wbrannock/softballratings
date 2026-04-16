@@ -82,9 +82,9 @@ def build_ratings(
     df = pd.DataFrame({
         "team": r.off.index,
         "n_games": counts.reindex(r.off.index).to_numpy(),
+        "net": (r.off - r.def_).to_numpy(),
         "off": r.off.to_numpy(),
         "def": r.def_.to_numpy(),
-        "net": (r.off - r.def_).to_numpy(),
         "p_beat_avg": p_avg,
     }).sort_values("net", ascending=False).reset_index(drop=True)
     df.insert(0, "rank", df.index + 1)
@@ -212,7 +212,7 @@ def main() -> None:
           f"league_mean = {df['league_mean'].iloc[0]:.3f}")
 
     print(f"\nTop {args.top}:")
-    cols = ["rank", "team", "n_games", "off", "def", "net", "p_beat_avg"]
+    cols = ["rank", "team", "n_games", "net", "off", "def", "p_beat_avg"]
     print(df[cols].head(args.top).round(3).to_string(index=False))
 
     if not args.no_movers:
