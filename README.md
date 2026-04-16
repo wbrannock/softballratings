@@ -1,6 +1,6 @@
 # softballratings
 
-KenPom-style opponent-adjusted offensive and defensive ratings for D1 college softball, scraped from [Massey Ratings](https://masseyratings.com/scores.php?s=658934&sub=11590&all=1) and fit via ridge regression with recency weighting.
+KenPom-style opponent-adjusted offensive and defensive ratings for D1 college softball and fit via ridge regression with recency weighting.
 
 ## Quickstart
 
