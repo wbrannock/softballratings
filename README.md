@@ -6,7 +6,7 @@ Opponent-adjusted offensive and defensive ratings for D1 college softball, fit v
 
 ## What it does
 
-Every team gets two numbers: an **offensive rating** (runs scored above league average vs. a generic defense) and a **defensive rating** (runs allowed above league average vs. a generic offense). Both are *opponent-adjusted* — a team isn't credited for piling up runs against a soft schedule, and isn't penalized for losing tight games to top opponents. Combine the two and you get a **net rating**: the team's expected margin against a perfectly average opponent on a neutral field.
+Every team gets two numbers: an **offensive rating** (runs scored above league average vs. a generic defense) and a **defensive rating** (runs allowed above league average vs. a generic offense). Both are *opponent-adjusted* so that a team isn't credited for piling up runs against a soft schedule, and isn't penalized for losing tight games to top opponents. Combine the two and you get a **net rating**: the team's expected margin against a perfectly average opponent on a neutral field.
 
 The model is fit jointly across every D1 game played this season. There's no preseason prior, no poll input, no human voting. It's a pure performance-on-the-field measurement.
 
